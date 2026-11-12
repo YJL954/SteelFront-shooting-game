@@ -3,79 +3,239 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Steel Front — English Original Page</title>
-<meta name="description" content="Pure English shell for Steel Front. The original English gameplay source is not present in this repository, so this page intentionally avoids the automatic Chinese translation layer.">
+<title>Steel Front — English Localized Edition</title>
+<meta name="description" content="English localized build of Steel Front. The game logic stays in the original source while the interface is translated to English.">
 <style>
-  :root {
-    color-scheme: dark;
-    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-    background: #0e110d;
-    color: #dcd7c2;
-  }
-  * { box-sizing: border-box; }
-  html, body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    border: 0;
-    background: #0e110d;
-  }
-  body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
-  .status {
-    width: min(760px, calc(100vw - 32px));
-    background: rgba(20, 23, 18, 0.9);
-    border: 1px solid rgba(220, 215, 194, 0.2);
-    border-radius: 18px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
-    padding: 32px 28px;
-    text-align: center;
-  }
-  h1 {
-    margin: 0 0 12px;
-    letter-spacing: 0.16em;
-    font-size: clamp(2rem, 4vw, 3.25rem);
-    font-weight: 800;
-  }
-  p {
-    margin: 10px 0;
-    line-height: 1.6;
-    font-size: 1rem;
-  }
-  .small {
-    color: rgba(220, 215, 194, 0.8);
-    font-size: 0.95rem;
-  }
-  a {
-    color: #d8f0ff;
-    text-decoration: underline;
-  }
+:root{color-scheme:dark;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#0e110d;color:#dcd7c2}*{box-sizing:border-box}html,body,#game{width:100%;height:100%;margin:0;border:0}body{overflow:hidden;background:#0e110d}#status{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:rgba(14,17,13,.92);z-index:2;text-align:center;padding:20px}h1{margin:0;font-size:clamp(2rem,4vw,3.2rem);letter-spacing:.18em}p{margin:0;color:#dcd7c2;font-size:1rem;line-height:1.6}.small{font-size:.9rem;color:rgba(220,215,194,.8)}a{color:#d8f0ff;text-decoration:underline}#game{display:none;position:fixed;inset:0;width:100%;height:100%;border:0;background:#0e110d;z-index:1}
 </style>
 </head>
 <body>
-<div class="status" id="status">
+<div id="status" class="status">
   <h1>STEEL FRONT</h1>
-  <p>English original page</p>
-  <p class="small">This repository currently contains the original game source in Chinese and the automatic translation layer has been intentionally removed.</p>
-  <p class="small">A complete English gameplay version requires the original English asset or a full manual localization pass.</p>
-  <p class="small"><a href="https://github.com/YJL954/SteelFront-shooting-game" target="_blank" rel="noopener">Open project repository</a></p>
+  <p>Loading the complete game and localizing the interface into English…</p>
+  <p class="small">Keeping the original Chinese source logic intact while rebuilding the UI in English.</p>
 </div>
+<iframe id="game" title="Steel Front English Localized Edition" allow="autoplay; clipboard-read; clipboard-write" referrerpolicy="no-referrer"></iframe>
 <script>
 (() => {
   'use strict';
+  const SOURCE = 'https://raw.githubusercontent.com/YJL954/SteelFront-shooting-game/main/Steel%20Front%20Chinese%20version.html';
+  const TRANSLATE = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-CN&tl=en&dt=t&q=';
+  const frame = document.getElementById('game');
   const status = document.getElementById('status');
-  const repoLink = 'https://github.com/YJL954/SteelFront-shooting-game';
-  status.innerHTML = `
-    <h1>STEEL FRONT</h1>
-    <p>English original page</p>
-    <p class="small">This page intentionally shows a pure English shell without the automatic Chinese translation layer.</p>
-    <p class="small">Steel Front is a top-down extraction shooter. To produce a fully translated gameplay experience, the original English source or a complete manual localization is required.</p>
-    <p class="small"><a href="${repoLink}" target="_blank" rel="noopener">Open project repository</a></p>
-  `;
+
+  const dictionary = {
+    '钢铁战线':'STEEL FRONT',
+    'STEEL FRONT':'STEEL FRONT',
+    '俯视角':'TOP-DOWN',
+    '战术撤离':'TACTICAL EXTRACTION',
+    '枪械改装':'GUN MODS',
+    '军饷':'PAY',
+    '大金':'GOLD',
+    '继续行动':'CONTINUE MISSION',
+    '烽火地带':'HAZARD ZONE',
+    '训练战场':'TRAINING GROUND',
+    '联机对战 · 房间号邀请':'PVP ARENA · ROOM CODE INVITE',
+    '军械库（商店）':'ARMORY (SHOP)',
+    '交易行（卖物资）':'MARKET (SELL SUPPLIES)',
+    '大金商城（充值）':'GOLD STORE (TOP-UP)',
+    '改装台（组装枪）':'WORKBENCH (ASSEMBLE GUN)',
+    '作战指南':'FIELD MANUAL',
+    '累计歼敌':'TOTAL ELIMINATIONS',
+    '成功撤离':'SUCCESSFUL EXTRACTIONS',
+    '大红收藏':'RED COLLECTION',
+    '返回':'BACK',
+    'ARMORY':'ARMORY',
+    'MARKET':'MARKET',
+    'FIELD MANUAL':'FIELD MANUAL',
+    '枪械商店':'GUN SHOP',
+    '配件商店':'ATTACHMENT SHOP',
+    '我的仓库':'MY STOCK',
+    '物资仓库':'SUPPLY STORES',
+    '我的挂单':'MY LISTINGS',
+    '出战简报':'DEPLOY BRIEF',
+    '选择干员':'SELECT OPERATOR',
+    '开始行动':'BEGIN OPERATION',
+    'DEPLOY':'DEPLOY',
+    '已暂停':'PAUSED',
+    '继续作战':'RESUME OPERATION',
+    '查看背包':'VIEW BAG',
+    '放弃行动（撤离模式视为阵亡）':'ABORT MISSION (DEATH IF EXTRACTION MODE)',
+    '战术背包（撤离后结算）':'TACTICAL BAG (SETTLED AFTER EXTRACTION)',
+    '关闭':'CLOSE',
+    '连接中断 · 重连中':'CONNECTION LOST · RECONNECTING',
+    '正在尝试恢复与好友的对战连接，请勿关闭页面……':'Attempting to restore the match connection. Please do not close this page…',
+    '冲刺':'SPRINT',
+    '开火':'FIRE',
+    '开镜':'ADS',
+    '换弹':'RELOAD',
+    '交互':'INTERACT',
+    '切枪':'SWAP GUN',
+    '战术':'TACTIC',
+    '支援':'SUPPORT',
+    '房间号':'ROOM CODE',
+    '创建房间':'CREATE ROOM',
+    '加入房间':'JOIN ROOM',
+    '输入 6 位房间号':'ENTER 6-DIGIT ROOM CODE',
+    '联机对战 PVP ARENA':'PVP ARENA',
+    '1v1 房间决斗':'1V1 ROOM DUEL',
+    '创建房间获得 6 位房间号，把房间号发给好友即可加入共同作战':'Create a room to generate a unique 6-digit code and share it with a friend to join the mission together.',
+    '房间最多 2 人，数据经 WebRTC 点对点加密通道直连同步':'Up to 2 players. Match data syncs directly over a WebRTC encrypted peer-to-peer channel.',
+    '你作为房主创建决斗房间，生成唯一 6 位房间号；好友加入后由你开局。':'As host, you create the duel room and generate the unique 6-digit room code. The match begins when your friend joins.',
+    '输入好友发来的 6 位房间号，加入后等待房主开始对战。':'Enter the 6-digit room code from a friend, then wait for the host to begin the match.',
+    '购买档位':'PURCHASE TIERS',
+    '确认订单':'CONFIRM ORDER',
+    '订单流水':'ORDER HISTORY',
+    '运行全流程自检':'RUN FULL FLOW SELF-TEST',
+    '作战中':'IN MISSION',
+    '撤离中':'EXTRACTING',
+    '未连接':'NOT CONNECTED',
+    '未命中':'MISS',
+    '已命中':'HIT',
+    '空仓':'EMPTY',
+    '已读':'READ',
+    '通知':'NOTICE'
+  };
+
+  const translator = `(() => {
+    'use strict';
+    const API = ${JSON.stringify(TRANSLATE)};
+    const CACHE_KEY = 'steel-front-en-translation-cache-v2';
+    const MAP = ${JSON.stringify(dictionary)};
+    const hasCJK = /[\\u3400-\\u9fff\\uf900-\\ufaff]/;
+    let cache = {};
+    try { cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}') || {}; } catch (_) {}
+    const queue = [];
+    const pending = new WeakSet();
+    let active = 0;
+    const MAX_ACTIVE = 5;
+
+    function applyStaticMap(value) {
+      if (!value || typeof value !== 'string') return value;
+      let out = value;
+      for (const [cn, en] of Object.entries(MAP)) {
+        if (cn && out.includes(cn)) out = out.split(cn).join(en);
+      }
+      return out;
+    }
+
+    function enqueueText(node) {
+      if (!node || !node.isConnected || !hasCJK.test(node.nodeValue || '') || pending.has(node)) return;
+      const parent = node.parentElement;
+      if (!parent || parent.closest('script,style,textarea,input,code,pre,svg,[data-no-translate]')) return;
+      const original = node.nodeValue;
+      const mapped = applyStaticMap(original);
+      if (mapped !== original) {
+        node.nodeValue = mapped;
+        return;
+      }
+      const key = 'text:' + original;
+      if (cache[key]) { node.nodeValue = cache[key]; return; }
+      pending.add(node);
+      queue.push({node, original, key, apply: value => { if (node.isConnected && node.nodeValue === original) node.nodeValue = value; }});
+      pump();
+    }
+
+    function enqueueAttribute(el, name) {
+      if (!el || !el.isConnected) return;
+      const original = el.getAttribute(name) || '';
+      if (!hasCJK.test(original)) return;
+      const mapped = applyStaticMap(original);
+      if (mapped !== original) {
+        const stamp = 'data-en-original-' + name;
+        if (!el.hasAttribute(stamp)) el.setAttribute(stamp, original);
+        if (el.getAttribute(name) === original) el.setAttribute(name, mapped);
+        return;
+      }
+      const stamp = 'data-en-original-' + name;
+      if (!el.hasAttribute(stamp)) el.setAttribute(stamp, original);
+      const source = el.getAttribute(stamp);
+      if (!hasCJK.test(source)) return;
+      const key = 'attr:' + name + ':' + source;
+      if (cache[key]) { if (el.getAttribute(name) === source) el.setAttribute(name, cache[key]); return; }
+      if (el.dataset['enQueued' + name]) return;
+      el.dataset['enQueued' + name] = '1';
+      queue.push({node: el, original: source, key, apply: value => {
+        delete el.dataset['enQueued' + name];
+        if (el.isConnected && el.getAttribute(stamp) === source && el.getAttribute(name) === source) el.setAttribute(name, value);
+      }});
+      pump();
+    }
+
+    async function translate(text) {
+      const response = await fetch(API + encodeURIComponent(text), {mode: 'cors', credentials: 'omit'});
+      if (!response.ok) throw new Error('Translation service returned ' + response.status);
+      const result = await response.json();
+      let translated = (result[0] || []).map(part => part && part[0] || '').join('');
+      if (!translated) throw new Error('Empty translation');
+      translated = applyStaticMap(translated);
+      return translated;
+    }
+
+    function pump() {
+      while (active < MAX_ACTIVE && queue.length) {
+        const item = queue.shift();
+        if (!item) continue;
+        if (cache[item.key]) { item.apply(cache[item.key]); continue; }
+        active++;
+        translate(item.original).then(value => {
+          cache[item.key] = value;
+          item.apply(value);
+          try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch (_) {}
+        }).catch(() => {
+          // If translation cannot run, leave the original readable text in place.
+        }).finally(() => { active--; pump(); });
+      }
+    }
+
+    function scan(root) {
+      if (!root) return;
+      if (root.nodeType === Node.TEXT_NODE) { enqueueText(root); return; }
+      if (root.nodeType !== Node.ELEMENT_NODE && root.nodeType !== Node.DOCUMENT_NODE) return;
+      if (root.nodeType === Node.ELEMENT_NODE) {
+        for (const attr of ['placeholder', 'title', 'aria-label', 'alt']) enqueueAttribute(root, attr);
+      }
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      let node;
+      while ((node = walker.nextNode())) enqueueText(node);
+      if (root.querySelectorAll) root.querySelectorAll('[placeholder],[title],[aria-label],[alt]').forEach(el => {
+        for (const attr of ['placeholder', 'title', 'aria-label', 'alt']) enqueueAttribute(el, attr);
+      });
+    }
+
+    const observer = new MutationObserver(records => {
+      for (const record of records) {
+        if (record.type === 'childList') record.addedNodes.forEach(scan);
+        else if (record.type === 'characterData') enqueueText(record.target);
+        else if (record.type === 'attributes') enqueueAttribute(record.target, record.attributeName);
+      }
+    });
+
+    observer.observe(document.documentElement, {subtree:true, childList:true, characterData:true, attributes:true, attributeFilter:['placeholder','title','aria-label','alt']});
+    document.documentElement.lang = 'en';
+    document.title = 'Steel Front — English Localized Edition';
+    scan(document.body);
+  })();`;
+
+  fetch(SOURCE, {mode: 'cors', credentials: 'omit'})
+    .then(response => {
+      if (!response.ok) throw new Error('Could not load the source game (' + response.status + ').');
+      return response.text();
+    })
+    .then(html => {
+      html = html.replace(/<html\b[^>]*>/i, '<html lang="en">')
+        .replace(/<title>[\s\S]*?<\/title>/i, '<title>Steel Front — English Localized Edition</title>');
+      const base = '<base href="https://raw.githubusercontent.com/YJL954/SteelFront-shooting-game/main/">';
+      html = html.replace(/<head[^>]*>/i, match => match + base);
+      const injected = '<script>' + translator.replace(/<\/script/gi, '<\/script') + '<\/script>';
+      html = html.replace(/<\/body>/i, injected + '</body>');
+      frame.srcdoc = html;
+      frame.style.display = 'block';
+      status.style.display = 'none';
+    })
+    .catch(error => {
+      status.innerHTML = '<h1>STEEL FRONT</h1><p>Unable to load the original game source.</p><p class="small">Open the source file directly in the repository and retry.</p><p><a href="' + SOURCE + '" target="_blank" rel="noopener">Open source</a></p>';
+    });
 })();
 </script>
 </body>
