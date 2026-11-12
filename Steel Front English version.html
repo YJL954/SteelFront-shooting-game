@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Steel Front — English Edition</title>
+<meta name="description" content="English edition of Steel Front, a top-down tactical extraction shooter.">
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#0e110d;color:#dcd7c2}*{box-sizing:border-box}html,body,#game{width:100%;height:100%;margin:0;border:0}body{overflow:hidden}#game{display:block;background:#0e110d}.status{position:fixed;inset:0;display:grid;place-content:center;gap:12px;padding:24px;text-align:center;background:#0e110d;color:#dcd7c2}.status h1{margin:0;color:#b8ad8a;letter-spacing:.08em}.status p{max-width:38rem;line-height:1.6;color:#a8ad9a}.status a{color:#e0963e}.small{font-size:.85rem;color:#8c927e}
+</style>
+</head>
+<body>
+<div class="status" id="status"><h1>STEEL FRONT</h1><p>Loading the complete game and translating its interface into English…</p><p class="small">The original game logic and saved game data are preserved.</p></div>
+<iframe id="game" title="Steel Front English Edition" allow="autoplay; clipboard-read; clipboard-write" referrerpolicy="no-referrer" style="display:none"></iframe>
+<script>
+(() => {
+  'use strict';
+  const SOURCE = 'https://raw.githubusercontent.com/YJL954/SteelFront-shooting-game/3da6e61254e949f5a88b99c07e44975b9b9ed695/Steel%20Front%20Chinese%20version.html';
+  const TRANSLATE = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-CN&tl=en&dt=t&q=';
+  const frame = document.getElementById('game');
+  const status = document.getElementById('status');
+
+  // Translate visible text nodes as they are created. Keeping the original game
+  // source in the frame means its gameplay, controls, and local saves remain intact.
+  const translator = `(() => {
+    'use strict';
+    const API = ${JSON.stringify(TRANSLATE)};
+    const CACHE_KEY = 'steel-front-en-translation-cache-v1';
+    const hasCJK = /[\\u3400-\\u9fff\\uf900-\\ufaff]/;
+    let cache = {};
+    try { cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}') || {}; } catch (_) {}
+    const queue = [];
+    const pending = new WeakSet();
+    let active = 0;
+    const MAX_ACTIVE = 5;
+
+    function enqueueText(node) {
+      if (!node || !node.isConnected || !hasCJK.test(node.nodeValue || '') || pending.has(node)) return;
+      const parent = node.parentElement;
+      if (!parent || parent.closest('script,style,textarea,input,code,pre,svg,[data-no-translate]')) return;
+      const original = node.nodeValue;
+      const key = 'text:' + original;
+      if (cache[key]) { node.nodeValue = cache[key]; return; }
+      pending.add(node);
+      queue.push({node, original, key, apply: value => { if (node.isConnected && node.nodeValue === original) node.nodeValue = value; }});
+      pump();
+    }
+
+    function enqueueAttribute(el, name) {
+      if (!el || !el.isConnected) return;
+      const original = el.getAttribute(name) || '';
+      if (!hasCJK.test(original)) return;
+      const stamp = 'data-en-original-' + name;
+      if (!el.hasAttribute(stamp)) el.setAttribute(stamp, original);
+      const source = el.getAttribute(stamp);
+      if (!hasCJK.test(source)) return;
+      const key = 'attr:' + name + ':' + source;
+      if (cache[key]) { if (el.getAttribute(name) === source) el.setAttribute(name, cache[key]); return; }
+      if (el.dataset['enQueued' + name]) return;
+      el.dataset['enQueued' + name] = '1';
+      queue.push({node: el, original: source, key, apply: value => {
+        delete el.dataset['enQueued' + name];
+        if (el.isConnected && el.getAttribute(stamp) === source && el.getAttribute(name) === source) el.setAttribute(name, value);
+      }});
+      pump();
+    }
+
+    async function translate(text) {
+      const response = await fetch(API + encodeURIComponent(text), {mode: 'cors', credentials: 'omit'});
+      if (!response.ok) throw new Error('Translation service returned ' + response.status);
+      const result = await response.json();
+      const translated = (result[0] || []).map(part => part && part[0] || '').join('');
+      if (!translated) throw new Error('Empty translation');
+      return translated;
+    }
+
+    function pump() {
+      while (active < MAX_ACTIVE && queue.length) {
+        const item = queue.shift();
+        if (cache[item.key]) { item.apply(cache[item.key]); continue; }
+        active++;
+        translate(item.original).then(value => {
+          cache[item.key] = value;
+          item.apply(value);
+          try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch (_) {}
+        }).catch(() => {
+          // If the translation service is unavailable, leave that text readable as-is.
+        }).finally(() => { active--; pump(); });
+      }
+    }
+
+    function scan(root) {
+      if (!root) return;
+      if (root.nodeType === Node.TEXT_NODE) { enqueueText(root); return; }
+      if (root.nodeType !== Node.ELEMENT_NODE && root.nodeType !== Node.DOCUMENT_NODE) return;
+      if (root.nodeType === Node.ELEMENT_NODE) {
+        for (const attr of ['placeholder', 'title', 'aria-label']) enqueueAttribute(root, attr);
+      }
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      let node;
+      while ((node = walker.nextNode())) enqueueText(node);
+      if (root.querySelectorAll) root.querySelectorAll('[placeholder],[title],[aria-label]').forEach(el => {
+        for (const attr of ['placeholder', 'title', 'aria-label']) enqueueAttribute(el, attr);
+      });
+    }
+
+    const observer = new MutationObserver(records => {
+      for (const record of records) {
+        if (record.type === 'childList') record.addedNodes.forEach(scan);
+        else if (record.type === 'characterData') enqueueText(record.target);
+        else if (record.type === 'attributes') enqueueAttribute(record.target, record.attributeName);
+      }
+    });
+    observer.observe(document.documentElement, {subtree:true, childList:true, characterData:true, attributes:true, attributeFilter:['placeholder','title','aria-label']});
+    document.documentElement.lang = 'en';
+    document.title = 'Steel Front — 2D Tactical Shooter';
+    scan(document.body);
+  })();`;
+
+  fetch(SOURCE, {mode: 'cors', credentials: 'omit'})
+    .then(response => {
+      if (!response.ok) throw new Error('Could not load the source game (' + response.status + ').');
+      return response.text();
+    })
+    .then(html => {
+      html = html.replace(/<html\\b[^>]*>/i, '<html lang="en">')
+        .replace(/<title>[\\s\\S]*?<\\/title>/i, '<title>Steel Front — 2D Tactical Shooter</title>');
+      const base = '<base href="https://raw.githubusercontent.com/YJL954/SteelFront-shooting-game/3da6e61254e949f5a88b99c07e44975b9b9ed695/">';
+      html = html.replace(/<head[^>]*>/i, match => match + base);
+      const injected = '<script>' + translator.replace(/<\\/script/gi, '<\\/script') + '<\\/script>';
+      html = html.replace(/<\\/body>/i, injected + '</body>');
+      frame.srcdoc = html;
+      frame.style.display = 'block';
+      status.style.display = 'none';
+    })
+    .catch(error => {
+      status.innerHTML = '<h1>STEEL FRONT</h1><p>Unable to load the original game. Open the source file online and try again.</p><p><a href="' + SOURCE + '" target="_blank" rel="noopener">Open the original game</a></p><p class="small">' + String(error.message || error) + '</p>';
+    });
+})();
+</script>
+</body>
+</html>
